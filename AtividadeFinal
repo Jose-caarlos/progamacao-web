@@ -1,0 +1,103 @@
+// Importando o pacote mysql
+const mysql = require('mysql');
+
+// Configurações do banco de dados
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'seu_usuario',
+  password: 'sua_senha',
+  database: 'seu_banco_de_dados'
+});
+
+// Função para cadastrar um usuário
+function cadastrarUsuario() {
+  const nome = prompt('Digite o nome:');
+  const email = prompt('Digite o email:');
+  const senha = prompt('Digite a senha:');
+  
+  const query = `INSERT INTO usuarios (nome, email, senha) VALUES ('${nome}', '${email}', '${senha}')`;
+  connection.query(query, (error, results, fields) => {
+    if (error) throw error;
+    console.log('Usuário cadastrado com sucesso!');
+  });
+}
+
+// Função para efetuar login
+function efetuarLogin() {
+  const email = prompt('Digite o email:');
+  const senha = prompt('Digite a senha:');
+  
+  const query = `SELECT * FROM usuarios WHERE email = '${email}' AND senha = '${senha}'`;
+  connection.query(query, (error, results, fields) => {
+    if (error) throw error;
+    if (results.length > 0) {
+      console.log('Login bem-sucedido!');
+    } else {
+      console.log('Credenciais inválidas. Tente novamente.');
+    }
+  });
+}
+
+// Função para recuperar senha
+function recuperarSenha() {
+  const email = prompt('Digite o email:');
+  
+  const query = `SELECT senha FROM usuarios WHERE email = '${email}'`;
+  connection.query(query, (error, results, fields) => {
+    if (error) throw error;
+    if (results.length > 0) {
+      const senha = results[0].senha;
+      console.log(`Sua senha é: ${senha}`);
+    } else {
+      console.log('E-mail não encontrado.');
+    }
+  });
+}
+
+// Função para excluir um usuário
+function excluirUsuario() {
+  const email = prompt('Digite o email:');
+  
+  const query = `DELETE FROM usuarios WHERE email = '${email}'`;
+  connection.query(query, (error, results, fields) => {
+    if (error) throw error;
+    console.log('Usuário excluído com sucesso!');
+  });
+}
+
+// Loop principal
+function mainLoop() {
+  const opcao = prompt('Selecione uma opção:\n1. Cadastrar usuário\n2. Efetuar login\n3. Recuperar senha\n4. Excluir usuário\n0. Sair');
+  
+  switch (opcao) {
+    case '1':
+      cadastrarUsuario();
+      break;
+    case '2':
+      efetuarLogin();
+      break;
+    case '3':
+      recuperarSenha();
+      break;
+    case '4':
+      excluirUsuario();
+      break;
+    case '0':
+      connection.end();
+      return;
+    default:
+      console.log('Opção inválida. Tente novamente.');
+      break;
+  }
+  
+  mainLoop();
+}
+
+// Estabelecer conexão com o banco de dados
+connection.connect((error) => {
+  if (error) throw error;
+  console.log('Conexão estabelecida com o banco de dados.');
+
+  // Iniciar o loop principal
+  mainLoop();
+});
